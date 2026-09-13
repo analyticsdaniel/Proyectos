@@ -37,7 +37,8 @@ class Config:
     """Corta el analisis a los primeros N frames analizados. Util para probar."""
 
     # --- Placas ---
-    leer_placas: bool = True
+    leer_placas: bool = False
+    """Apagado por defecto: el caso de salon de clase no paga el costo del OCR."""
     modelo_placas: str | None = None
     """Pesos YOLO entrenados para placas. Si es None se usa el detector por contornos."""
 

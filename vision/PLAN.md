@@ -47,8 +47,20 @@ caben dos lecturas y llevan a proyectos distintos:
 
 Las dos comparten el detector y el seguimiento. Se diferencian en todo lo
 demás: el ángulo de cámara, la distancia, si la parte de placas existe y qué se
-mide al final. **Hasta que esto se responda, solo tiene sentido construir la
-parte común.**
+mide al final.
+
+**Decidido el 13 de septiembre de 2026: las dos, en momentos distintos.** De
+ahí salen tres consecuencias que mandan sobre el resto del documento:
+
+1. Se construye primero la parte común, que sirve a los dos casos: detección,
+   seguimiento, conteo de únicos y salidas.
+2. La lectura de placas queda detrás de un interruptor en la configuración,
+   `leer_placas`, **apagado por defecto**. Un salón de clase no paga el costo
+   de una etapa de OCR que no va a usar.
+3. La Fase 0 se corre dos veces, una por escena, porque el umbral que decide
+   es distinto: en calle manda el ancho de la placa en píxeles, en salón manda
+   el alto de la persona, y ese segundo umbral lo cumple casi cualquier
+   grabación.
 
 ---
 
@@ -207,8 +219,10 @@ anotado. Más la línea de comandos.
 el conteo de personas únicas no se desvía más del 20 por ciento del conteo
 manual, y el proceso se puede interrumpir y reanudar.
 
-**Fase 2. Placas.** Solo si la Fase 0 pasa. Detección de la región de la placa,
-OCR y enganche con la votación que ya está escrita.
+**Fase 2. Placas.** Solo si la Fase 0 pasa, y solo para la escena de calle.
+Detección de la región de la placa, OCR y enganche con la votación que ya está
+escrita. Queda detrás de `leer_placas`, apagado por defecto, de modo que el
+caso de salón nunca la ejecuta.
 *Aceptación:* 6 de 10 placas correctas en las condiciones de la sección 6.4.
 
 **Fase 3. Pruebas y README.** Pruebas sobre la normalización y la votación, que
@@ -234,5 +248,7 @@ algo para alguien.
 
 ## 10. El accionable, uno solo
 
-**Grabar 60 segundos con la cámara donde iría de verdad y responder si es calle
-o salón.** Todo lo demás depende de eso y no cuesta nada.
+**Grabar 60 segundos con la cámara donde iría de verdad, en la escena de
+calle.** Es la única de las dos cuyo umbral está en duda, y sin ese video no se
+puede decidir si la Fase 2 existe. La Fase 1 no depende de esto y puede
+arrancar en paralelo.
