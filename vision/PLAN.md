@@ -419,11 +419,135 @@ esa medición sale el lente que hay que pedir**, no al revés.
 
 ---
 
-## 12. El accionable, uno solo
+## 12. ¿Es el alcance el adecuado?
 
-**Comprar un trípode con soporte de celular, entre COP 40.000 y 80.000, y
-grabar 60 segundos parado donde iría la cámara en la escena de calle.** Es la
-única compra que tiene sentido hoy. De ese video salen las dos cifras que
-deciden todo lo demás: el ancho de placa en píxeles, que dice si la Fase 2
-existe, y la distancia real al punto de paso, que dice qué lente pedir. La Fase
-1 no depende de esto y puede arrancar en paralelo.
+### 12.1 La respuesta corta
+
+**Técnicamente sí, comercialmente no.** El alcance está bien armado como
+ejercicio de ingeniería y mal medido como producto: tiene de más la parte
+difícil que no paga, y de menos la parte fácil que sí. Las dos correcciones
+están abajo.
+
+### 12.2 Lo que de verdad se está construyendo
+
+Conviene nombrarlo bien, porque el nombre cambia la decisión. Esto no es un
+detector de carros. **Es un convertidor de video en tabla**: entra una hora de
+grabación y sale un CSV con qué pasó, cuándo y cuántas veces. La detección es
+una etapa de esa cadena, no el producto.
+
+Y el detector no es el activo. YOLO está preentrenado, es gratuito y cualquiera
+lo corre en diez líneas. **Todo lo valioso está en la parte aburrida:** poner
+la cámara donde toca, consolidar los eventos en objetos únicos, y entregar algo
+que alguien lea. Optimizar el modelo es el eje equivocado.
+
+Eso además juega a su favor: la parte de ingeniería de datos, que es la que
+convierte eventos en una tabla y en un informe, es exactamente su oficio. La
+parte de visión es la commodity.
+
+### 12.3 Dónde está mal medido el alcance hoy
+
+**Sobra la parte de placas, y sobra por una razón dura.** Leerlas es lo más
+difícil del proyecto, lo que obliga a la compra de COP 1.700.000 a 3.400.000
+por punto, y lo único que ya es un producto terminado de estantería: Plate
+Recognizer cobra USD 35 al mes por cámara, y las cámaras LPR de Hikvision o
+Dahua traen el reconocimiento incorporado. **Construir desde cero algo que
+cuesta USD 35 al mes solo se justifica si el volumen es enorme o si el dato no
+puede salir del sitio.** Ninguna de las dos aplica hoy.
+
+**Falta la salida que alguien compra.** Un CSV de detecciones no es un
+entregable, es materia prima. Lo que se paga es el conteo por movimiento, la
+hora pico, la composición vehicular. Eso está a unas 150 o 200 líneas del
+seguimiento que ya está escrito, y es la brecha más rentable del proyecto.
+
+### 12.4 Los usos que valen más, ordenados
+
+Todos corren sobre el mismo pipeline de la Fase 1. Cambian las clases, la
+cámara y el informe, no el motor.
+
+**1. Aforos vehiculares para estudios de tránsito.** El mejor encaje, y por
+lejos. Hoy ese trabajo lo hace una persona parada en una esquina con un
+contador manual, por turnos de ocho o doce horas, y se factura por punto y por
+día. El comprador ya existe, ya paga la versión manual, y no hay que
+convencerlo del problema. El entregable es un conteo clasificado por tipo de
+vehículo y por movimiento de giro, o sea un informe con tablas, que es
+justamente lo que usted hace. **No necesita placas ni cámara cara**, porque
+contar un bus no exige leerle nada.
+
+**2. Seguridad industrial: casco, chaleco, zona restringida.** Ticket más alto
+y comprador con presión regulatoria de la ARL. La misma cadena, con clases
+distintas. El costo es que exige entrenar con imágenes propias, no sirve el
+modelo de fábrica, y eso son semanas, no días.
+
+**3. Aforo y permanencia en comercio.** Cuántos entran, a qué hora, cuánto se
+quedan. Técnicamente lo más fácil de todo, casi gratis en hardware. El problema
+no es técnico: es que hay que vender local por local y el ticket es bajo.
+
+**4. Conteo de inventario o de piezas en bodega.** Encargo puntual, bien pago,
+sin recurrencia.
+
+**5. Control de acceso vehicular a conjuntos.** El que parecía el destino
+natural y es el peor de los cinco, por lo de 12.3: compite contra hardware que
+ya lo trae de fábrica.
+
+### 12.5 Qué cambiaría del plan
+
+1. **Dejar la Fase 1 intacta.** Es el activo reutilizable y sirve a los cinco
+   usos.
+2. **Bajar las placas de Fase 2 a opcional, y si algún día se necesitan,
+   comprarlas en vez de construirlas.** USD 35 al mes contra semanas de trabajo
+   propio.
+3. **Meter una Fase 2 nueva: línea de aforo y matriz de giros.** Que el usuario
+   dibuje una línea sobre el primer frame, y el sistema cuente cada vez que un
+   objeto rastreado la cruza, con dirección y clase. Con dos o más líneas sale
+   la matriz origen destino, que es el corazón de un estudio de tránsito. Son
+   unas 150 líneas sobre el seguimiento que ya existe. **Es el cambio con mejor
+   relación entre esfuerzo y valor de todo el documento.**
+4. **Meter una Fase 3 nueva: el informe.** Conteo por intervalos de 15 minutos,
+   hora pico, composición por clase, y una hoja lista para entregar. Sin esto
+   no hay producto, hay script.
+
+### 12.6 Las cuatro preguntas, sobre el alcance ampliado
+
+**Plata.** Con el alcance de hoy, ninguna, y ya estaba dicho en 6.1. Con
+aforos, sí hay: reemplaza un costo laboral que alguien ya está pagando. **Pero
+eso todavía no es un hecho verificado, es una hipótesis mía**, y hay que
+confirmarla antes de escribir otra línea.
+
+**Volumen.** No depende de publicar. Pasa.
+
+**Activo si muere.** Mejora respecto al alcance anterior: queda un pipeline que
+sirve a cinco mercados en vez de uno, más el dato medido.
+
+**Criterio de matar.** Se mantiene el 15 de octubre de 2026 de la sección 6.4
+para las placas, y se agrega uno para la dirección nueva: si al 30 de
+septiembre de 2026 ninguna firma de estudios de tránsito confirma que paga por
+aforos, la hipótesis de 12.4 queda desmentida y el proyecto vuelve a ser
+aprendizaje, sin más inversión de tiempo.
+
+### 12.7 Lo que NO hay que hacer
+
+1. **No ampliar a reconocimiento facial.** Cambia el régimen legal completo, de
+   dato personal a dato sensible y biométrico, y con eso el proyecto pasa de
+   necesitar un aviso a necesitar un abogado.
+2. **No perseguir un modelo mejor.** El modelo de fábrica ya acierta más que la
+   calidad del video que va a recibir. El cuello de botella es la cámara y el
+   sitio.
+3. **No construir cinco usos a la vez.** El pipeline es común, pero cada informe
+   es otro producto.
+4. **No comprar la cámara LPR antes de tener el primer comprador.** Es la única
+   compra grande del proyecto y es la que menos se necesita.
+
+---
+
+## 13. El accionable, uno solo
+
+**Llamar a dos firmas de estudios de tránsito o movilidad y preguntar qué
+pagan hoy por un día de aforo vehicular en un punto.** Dos llamadas, quince
+minutos, cero pesos. Si pagan, la sección 12.4 deja de ser hipótesis mía y el
+proyecto tiene comprador antes de tener producto, que es el orden correcto. Si
+no pagan, se evita construir cuatro fases para nadie.
+
+El trípode de COP 40.000 a 80.000 y los 60 segundos de grabación siguen siendo
+el prerrequisito técnico, y la Fase 1 puede arrancar en paralelo porque sirve
+en los cinco escenarios. Pero la llamada va primero, porque es la única que
+puede cambiar la respuesta a todo lo demás.
