@@ -411,27 +411,92 @@ Alkosto o un distribuidor Hikvision o Dahua local antes de comprar.
 
 ### 11.8 Modelos concretos, si se compra de todas formas
 
-Consultado el 13 de septiembre de 2026. **No pude abrir las fichas de Amazon
-desde el entorno de trabajo**, así que de cada una se conocen las
-especificaciones que aparecen en el título del producto, y **no el precio, ni
-la disponibilidad, ni si envía a Colombia.** Eso hay que verificarlo a mano.
+**Verificado el 13 de septiembre de 2026, desde el computador de Daniel.** La
+primera versión de esta sección no pudo abrir Amazon desde el entorno de la
+nube; esta sí. Amazon detecta la conexión desde Colombia y muestra la entrega a
+Colombia y los precios en pesos sin iniciar sesión. Los pesos son la conversión
+que hace Amazon, no una tasa escogida aquí.
 
 **Primera opción, para distancias de 3 a 12 metros, que es el caso de una
-portería o la entrada de un parqueadero.** Anpviz LPR/ANPR, 4MP a 30 fps, lente
-motorizado de 2,7 a 13,5 mm, WDR de 120 dB, infrarrojo de 40 metros, IP67, PoE.
+portería o la entrada de un parqueadero.** Anpviz LPR/ANPR, modelo
+IPC-B7340WD-5X-LPR-1, 4MP a 30 fps, lente motorizado de 2,7 a 13,5 mm, WDR de
+120 dB, infrarrojo de 40 metros, IP67, PoE.
 `https://www.amazon.com/Anpviz-Recognition-2-7-13-5mm-Motorized-Nightvision/dp/B0H11T45YZ`
 
-**Segunda opción, para 10 a 30 metros, si la cámara tiene que ir lejos.**
-Anpviz LPR/ANPR, 4MP a 30 o 60 fps, lente motorizado de 8 a 32 mm, WDR de 140
-dB, sensor de 1/1,8 pulgadas, infrarrojo de 100 metros.
+**Segunda opción, para 7 a 30 metros, si la cámara tiene que ir lejos.** Anpviz
+LPR/ANPR, modelo IPC-B7842WD-4X-LPR-32, 4MP a 30 fps o 1440p a 60 fps, lente
+motorizado de 8 a 32 mm, WDR de 140 dB, sensor de 1/1,8 pulgadas, infrarrojo de
+100 metros. La ficha recomienda de 23 a 98 pies para leer placas, que son de 7
+a 30 metros.
 `https://www.amazon.com/License-Recognition-Camera-8-32mm-Vision/dp/B0H2MGXGDD`
 Los 60 fps de esta son una ventaja real para vehículos rápidos, por lo de la
 sección 11.3.
 
 **La de referencia profesional**, más cara y la que usan las instalaciones de
-verdad, es la Hikvision iDS-2CD7A46G0/P-IZHS de 8 a 32 mm. Esa **se consigue en
-Colombia con distribuidor local**, lo que trae garantía y soporte que una
-importación no da.
+verdad, es la Hikvision iDS-2CD7A46G0/P-IZHS, que viene en dos variantes de
+lente, de 2,8 a 12 mm y de 8 a 32 mm. **Se consigue en Colombia con
+distribuidor local**, lo que trae garantía y soporte que una importación no da.
+
+**Lo medido:**
+
+| | Anpviz 2,7 a 13,5 mm | Anpviz 8 a 32 mm | Hikvision iDS-2CD7A46G0/P-IZHS |
+|---|---|---|---|
+| Precio | COP 1.423.669 | COP 2.259.319 | **No verificado** en Colombia |
+| Tasas de importación estimadas por Amazon | COP 281.800 | COP 440.573 | No aplica, es compra local |
+| Tasas como porcentaje del precio | 19,8 % | 19,5 % | |
+| Envío a Colombia | Gratis | Gratis | |
+| **Total puesto en Colombia** | **COP 1.705.469** | **COP 2.699.892** | **No verificado** |
+| ¿Envía a Colombia? | Sí | Sí | Es local |
+| Entrega | 23 de septiembre | 23 de septiembre | |
+| Disponibilidad | 13 unidades | 8 unidades | SYSCOM Colombia la lista |
+| Calificación | 1,0 de 5, **una sola reseña** | 4,5 de 5, 42 reseñas | |
+| Vende y despacha | AnpvizDirect, despacha Amazon | AnpvizDirect, despacha Amazon | Distribuidor local |
+| Garantía | Devolución de 30 días por Amazon | Devolución de 30 días por Amazon | 5 años, según SYSCOM Colombia |
+
+**El carrito.** Las dos quedaron en un carrito de invitado, sin cuenta: subtotal
+COP 3.682.988 por las dos. **El carrito no desglosa el depósito de tasas de
+importación sin iniciar sesión y llegar al pago**, así que las tasas de la
+tabla son la estimación que Amazon muestra en cada ficha, con su desglose de
+precio más envío más tasas, y no un cobro confirmado. El plan suponía cerca de
+un 30 por ciento encima; Amazon estima un 19,5 a 19,8 por ciento, que es
+prácticamente el IVA del 19.
+
+**La Hikvision: no pude verificar el precio en Colombia.** Lo intenté por tres
+lados y los tres lo esconden: SYSCOM Colombia, que es mayorista, muestra la
+ficha pero el precio solo con cuenta de instalador; hikvisioncolombia.com solo
+ofrece "Solicitar cotización"; y Mercado Libre Colombia exige iniciar sesión
+para ver el listado. La única cifra pública que encontré es de Estados Unidos:
+**USD 729** por la variante de 8 a 32 mm en surveillance-video.com, sin envío
+ni impuestos y sin decir si envía a Colombia. A la tasa de referencia de la
+sección 11.6, COP 4.200, son unos COP 3.060.000 antes de envío e impuestos.
+**Eso es una cuenta, no una cotización.** Para cerrar la comparación hace falta
+pedirle precio a un instalador con cuenta en SYSCOM.
+
+**Tres hallazgos que cambian la lectura:**
+
+1. **Las dos Anpviz dicen en la ficha que solo funcionan con grabadores Anpviz,
+   no con los de otras marcas.** Para este proyecto no hace falta grabador:
+   basta con que la cámara entregue un flujo RTSP, como dice la sección 13.1.
+   **La ficha no dice si lo entrega, y eso no está verificado.** La descripción
+   de la primera cita el número de pieza 2CD3646G2T/P-IZSY, que tiene el
+   formato de Hikvision, lo que sugiere que es una Hikvision con otra marca;
+   tampoco está verificado. Antes de comprar una Anpviz hay que preguntarle al
+   vendedor si da RTSP sin grabador.
+2. **La Hikvision sí declara ONVIF perfiles S, G y T, ISAPI y SDK**, según la
+   ficha de SYSCOM Colombia, y funciona sola, sin grabador, guardando en la
+   tarjeta. ONVIF perfil S es el que obliga a entregar RTSP. Su obturador llega
+   a 1/100.000, que sobra contra el 1/1000 que pide una avenida en la sección
+   11.3. La variante que lista SYSCOM es la de 2,8 a 12 mm.
+3. **La Anpviz corta tiene una sola reseña y es de una estrella.** La que tiene
+   historial es la de 8 a 32 mm, con 42.
+
+**Cómo queda la comparación, con lo que sí se sabe.** La Anpviz de 2,7 a 13,5
+mm cuesta COP 1,7 millones puesta en Colombia, pero con una sola reseña y la
+duda del RTSP. La de 8 a 32 mm cuesta COP 2,7 millones y tiene historial, con
+la misma duda. La Hikvision tiene lo que las otras dos no garantizan, RTSP
+declarado y cinco años de garantía local, y su precio sigue sin conocerse. Nada
+de esto cambia la sección 11.7: la compra sigue esperando a la distancia
+medida.
 
 **Por qué cualquiera de las tres sirve sin haber medido la distancia:** las
 tres tienen **lente motorizado varifocal**, o sea que el zoom se ajusta después
@@ -441,15 +506,12 @@ antes de comprar; uno motorizado se corrige en el poste.
 
 **Antes de pagar, dos verificaciones:**
 
-1. **Envío a Colombia.** Poner el artículo en el carrito y cambiar la dirección
-   de entrega a Colombia. Si no aplica, Amazon lo dice con un aviso de que no
-   se puede enviar a esa ubicación. Muchos artículos de vendedores externos son
-   solo Estados Unidos.
-2. **El costo real contra el local.** Una importación suma el depósito de tasas
-   de importación, el IVA del 19 por ciento y el arancel que corresponda, que
-   en conjunto pueden agregar cerca de un 30 por ciento. Con eso encima, un
-   distribuidor Hikvision o Dahua en Colombia puede salir igual o más barato, y
-   además responde por la garantía.
+1. **Envío a Colombia.** ✅ Verificado el 13 de septiembre de 2026: las dos
+   Anpviz envían a Colombia, con envío gratis.
+2. **El costo real contra el local.** A medias. El lado de la importación ya
+   está medido: Amazon estima un 19,5 a 19,8 por ciento encima, no el 30 que se
+   suponía. El lado local no, porque ningún vendedor colombiano publica el
+   precio de la Hikvision. Falta una cotización.
 
 ### 11.7 Por qué no comprar nada todavía
 
