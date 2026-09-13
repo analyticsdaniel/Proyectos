@@ -409,6 +409,48 @@ Alkosto o un distribuidor Hikvision o Dahua local antes de comprar.
 | Tiempo real en vez de por lotes | GPU usada RTX 3060 12 GB | COP 840.000 a 1.180.000 |
 | Sin computador prendido | Raspberry Pi 5 con kit Hailo | COP 800.000 |
 
+### 11.8 Modelos concretos, si se compra de todas formas
+
+Consultado el 13 de septiembre de 2026. **No pude abrir las fichas de Amazon
+desde el entorno de trabajo**, así que de cada una se conocen las
+especificaciones que aparecen en el título del producto, y **no el precio, ni
+la disponibilidad, ni si envía a Colombia.** Eso hay que verificarlo a mano.
+
+**Primera opción, para distancias de 3 a 12 metros, que es el caso de una
+portería o la entrada de un parqueadero.** Anpviz LPR/ANPR, 4MP a 30 fps, lente
+motorizado de 2,7 a 13,5 mm, WDR de 120 dB, infrarrojo de 40 metros, IP67, PoE.
+`https://www.amazon.com/Anpviz-Recognition-2-7-13-5mm-Motorized-Nightvision/dp/B0H11T45YZ`
+
+**Segunda opción, para 10 a 30 metros, si la cámara tiene que ir lejos.**
+Anpviz LPR/ANPR, 4MP a 30 o 60 fps, lente motorizado de 8 a 32 mm, WDR de 140
+dB, sensor de 1/1,8 pulgadas, infrarrojo de 100 metros.
+`https://www.amazon.com/License-Recognition-Camera-8-32mm-Vision/dp/B0H2MGXGDD`
+Los 60 fps de esta son una ventaja real para vehículos rápidos, por lo de la
+sección 11.3.
+
+**La de referencia profesional**, más cara y la que usan las instalaciones de
+verdad, es la Hikvision iDS-2CD7A46G0/P-IZHS de 8 a 32 mm. Esa **se consigue en
+Colombia con distribuidor local**, lo que trae garantía y soporte que una
+importación no da.
+
+**Por qué cualquiera de las tres sirve sin haber medido la distancia:** las
+tres tienen **lente motorizado varifocal**, o sea que el zoom se ajusta después
+de instalada, mirando la imagen en el sitio. Eso es exactamente el seguro
+contra el error de la sección 11.1. Un lente fijo obliga a acertar la distancia
+antes de comprar; uno motorizado se corrige en el poste.
+
+**Antes de pagar, dos verificaciones:**
+
+1. **Envío a Colombia.** Poner el artículo en el carrito y cambiar la dirección
+   de entrega a Colombia. Si no aplica, Amazon lo dice con un aviso de que no
+   se puede enviar a esa ubicación. Muchos artículos de vendedores externos son
+   solo Estados Unidos.
+2. **El costo real contra el local.** Una importación suma el depósito de tasas
+   de importación, el IVA del 19 por ciento y el arancel que corresponda, que
+   en conjunto pueden agregar cerca de un 30 por ciento. Con eso encima, un
+   distribuidor Hikvision o Dahua en Colombia puede salir igual o más barato, y
+   además responde por la garantía.
+
 ### 11.7 Por qué no comprar nada todavía
 
 El lente se escoge con la distancia medida, y esa distancia no se sabe hasta
