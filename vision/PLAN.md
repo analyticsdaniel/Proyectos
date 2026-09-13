@@ -246,9 +246,184 @@ algo para alguien.
 
 ---
 
-## 10. El accionable, uno solo
+## 10. Qué es el OCR y qué cuesta
 
-**Grabar 60 segundos con la cámara donde iría de verdad, en la escena de
-calle.** Es la única de las dos cuyo umbral está en duda, y sin ese video no se
-puede decidir si la Fase 2 existe. La Fase 1 no depende de esto y puede
-arrancar en paralelo.
+**OCR** es reconocimiento óptico de caracteres: convertir una imagen que
+contiene texto en texto que el computador puede manipular. En este proyecto es
+la última etapa de tres. Primero YOLO encuentra el carro. Después se ubica el
+rectángulo de la placa dentro del carro. Se recorta esa imagen, que suele medir
+unos 120 por 50 píxeles, y el OCR es lo que dice qué letras y números hay ahí.
+
+**Lo que cuesta, en las dos rutas posibles:**
+
+1. **OCR local, que es la ruta del plan. Cero pesos.** EasyOCR o PaddleOCR son
+   librerías gratuitas que se descargan una vez y corren en el computador. No
+   cobran por imagen, no tienen mensualidad y no mandan nada a internet, que
+   además resuelve la mitad de la nota legal de la sección 7.
+2. **OCR en la nube, de pago.** Google Cloud Vision cobra USD 1,50 por cada
+   1.000 imágenes, con las primeras 1.000 del mes gratis. Plate Recognizer, que
+   es especializado en placas y no en texto genérico, cobra USD 50 al mes por
+   50.000 lecturas, o USD 35 al mes por cámara con lecturas ilimitadas.
+
+**La aritmética que decide.** Una hora de video a 30 fps, analizando uno de
+cada tres frames, son 36.000 frames. Si en el 10 por ciento aparece un
+vehículo, son 3.600 imágenes que mandar. En Google eso cuesta USD 5,40 por cada
+hora de video. Local cuesta cero. Con grabación continua de una portería, ocho
+horas diarias, la diferencia es del orden de USD 1.300 al año contra cero.
+
+**Por qué se escoge el local, más allá del precio.** El OCR de pago acierta más
+que el gratuito frame por frame, eso es cierto. Pero la votación entre frames
+que ya está escrita en `placas_texto.py` cierra buena parte de esa diferencia,
+porque un vehículo aparece en decenas de frames y basta con que unos pocos
+salgan nítidos. Y sobre todo: **el cuello de botella no es el OCR, es la
+resolución de la placa.** Ningún servicio de pago lee una placa de 40 píxeles.
+Eso se arregla con lente, no con presupuesto de software.
+
+---
+
+## 11. Hardware
+
+No hay cámaras hoy, así que esta sección define qué comprar, cuándo y por qué.
+El orden importa: **la recomendación es no comprar nada todavía**, y las
+razones están al final.
+
+### 11.1 El error de dos millones de pesos que hay que evitar
+
+La compra típica es un domo 4K gran angular, porque 4K suena a que lee todo. No
+lee placas. Un 4K con lente de 2,8 mm a 10 metros pone unos 70 píxeles sobre la
+placa, que no alcanza. Un 4MP con lente de 12 mm, que cuesta parecido y tiene
+menos de la mitad de píxeles, pone 170 a esa misma distancia y sí lee.
+
+**El lente manda sobre los megapíxeles.** Todo lo demás de esta sección sale de
+ahí.
+
+### 11.2 Primera regla: píxeles sobre la placa
+
+Una placa colombiana mide 33 cm de ancho y el OCR necesita entre 90 y 150
+píxeles sobre ese ancho. Eso son unos 300 a 450 píxeles por metro en el punto
+exacto donde pasa el carro. La cuenta es:
+
+    píxeles por metro = ancho del sensor en píxeles / (2 × distancia × tan(ángulo horizontal / 2))
+
+Para una cámara de 4MP, que son 2.560 píxeles de ancho, el ancho de placa que
+queda según el lente y la distancia:
+
+| Lente | Ángulo | A 3 m | A 5 m | A 10 m | A 15 m | A 25 m |
+|---|---|---|---|---|---|---|
+| 2,8 mm | 100° | 118 px | 71 px | 36 px | 24 px | 14 px |
+| 6 mm | 55° | 271 px | 162 px | 81 px | 54 px | 32 px |
+| 12 mm | 28° | 565 px | 339 px | 169 px | 113 px | 68 px |
+| 25 mm | 14° | 1146 px | 688 px | 344 px | 229 px | 138 px |
+
+Todo lo que esté por debajo de 90 no se lee. La tabla se resume sola: con
+lente ancho hay que estar prácticamente encima del carro, y de 10 metros en
+adelante hace falta teleobjetivo.
+
+**El corolario que sorprende a todo el mundo:** un lente de 12 mm cubre 28
+grados, que a 10 metros son 5 metros de ancho, o sea un carril. **Una sola
+cámara no puede leer placas y ver la escena completa al tiempo.** Un montaje
+real son dos cámaras: una ancha de contexto y una angosta apuntada al punto por
+donde pasan los carros.
+
+### 11.3 Segunda regla: obturador, que pesa más que la resolución
+
+Un carro a 30 km/h se mueve 8,3 metros por segundo. Con obturador de 1/30 de
+segundo recorre 28 cm mientras la foto se toma, y la placa sale barrida. No hay
+resolución que arregle eso.
+
+Un carácter de placa mide unos 4,5 cm, y el barrido tolerable es como un tercio
+de eso, 1,5 cm. De ahí sale el obturador mínimo:
+
+| Velocidad del vehículo | Obturador mínimo |
+|---|---|
+| 10 km/h, un carro entrando a una portería | 1/200 |
+| 30 km/h, calle residencial | 1/550 |
+| 50 km/h, avenida | 1/1000 |
+| 80 km/h | 1/1500 |
+
+Dos consecuencias de plata. La primera: **un resalto, un portón o una curva
+valen más que una cámara mejor**, porque bajar el carro de 30 a 10 km/h
+relaja el obturador casi tres veces. La segunda: obturador rápido significa
+menos luz entrando, y por eso las cámaras de placas de verdad traen su propio
+iluminador infrarrojo. Una cámara común de noche baja el obturador sola para
+compensar, y ahí se pierde toda la placa.
+
+### 11.4 Tercera regla: geometría, que es gratis
+
+Ángulo horizontal y vertical por debajo de 30 grados respecto a la placa, ideal
+por debajo de 15. Altura de montaje entre 1 y 1,5 metros si se puede, que es
+mucho más bajo de lo que la gente instala. Apuntada al punto donde el carro va
+más lento. Esto no cuesta nada y decide más que cualquier compra.
+
+### 11.5 Los niveles de compra
+
+**Nivel 0. Cero pesos, y es donde hay que empezar.** El celular en un trípode.
+Un trípode con soporte de celular cuesta entre COP 40.000 y 80.000. Se graba en
+modo pro a 1080p, obturador fijo en 1/500, enfoque manual. Con esto se hacen la
+Fase 0 y la Fase 1 completas. No sirve para dejarlo 24/7 ni para grabar de
+noche, y no hace falta que sirva todavía.
+
+**Nivel 1. Salón de clase o conteo de personas. USD 40 a 120.** Una webcam
+1080p si el computador está cerca, o una cámara IP wifi 2K. Aquí el lente ancho
+sí es lo correcto, y el obturador no importa porque la gente se mueve lento.
+Una persona se detecta bien desde 40 píxeles de alto, así que casi cualquier
+cámara sirve.
+
+**Nivel 2. Portería o calle, con placas. USD 250 a 600 por punto.** Cámara IP
+tipo LPR o ANPR con PoE, 4MP a 30 fps, lente varifocal motorizado de 2,7 a 13,5
+mm o de 8 a 32 mm, WDR de 120 dB o más para el contraste de los faros,
+obturador ajustable y iluminador infrarrojo propio. Las que existen de fábrica
+para esto son las series LPR de Hikvision, Dahua, Uniview y LTS, y hay
+alternativas más baratas tipo Anpviz. Sumar el switch PoE, entre USD 30 y 60,
+cable UTP exterior, y una UPS pequeña de USD 60 a 100 para que un corte de luz
+no se lleve la grabación. Y la segunda cámara ancha de contexto, USD 60 a 120,
+por lo dicho en 11.2.
+
+**Nivel 3. Cómputo.** Para la Fase 1 procesando archivos, el computador actual
+sirve aunque vaya lento: en CPU, YOLO nano sobre 1080p hace del orden de 5 a 15
+frames por segundo, así que una hora de video toma una o dos horas analizando
+uno de cada tres frames. Si se quiere tiempo real, una GPU NVIDIA usada tipo
+RTX 3060 de 12 GB, entre USD 200 y 280, es el mejor peso por precio y lleva eso
+a más de 60 frames por segundo. Si se quiere sin computador prendido, una
+Raspberry Pi 5 con el kit Hailo de 26 TOPS sale sobre USD 190 entre las dos
+piezas, y una Jetson Orin Nano ronda los USD 250.
+
+**Almacenamiento.** Una cámara 4MP en H.265 gasta entre 4 y 6 Mbps, que son
+unos 2,5 GB por hora y del orden de 55 GB por día en grabación continua. Un
+disco de 4 TB, entre USD 80 y 100, guarda cerca de dos meses de una cámara. Si
+solo interesa el CSV y no el video, se procesa y se descarta, y el
+almacenamiento deja de ser un problema.
+
+### 11.6 Costo total por escenario
+
+Cifras aproximadas, a una tasa de referencia de COP 4.200 por dólar. **No pude
+confirmar precios de retail colombiano desde acá**, así que estos números
+sirven para decidir, no para presupuestar: hay que cotizar en Mercado Libre,
+Alkosto o un distribuidor Hikvision o Dahua local antes de comprar.
+
+| Escenario | Equipo | Aproximado |
+|---|---|---|
+| Fase 0 y Fase 1, las dos escenas | Trípode y el celular que ya tiene | COP 40.000 a 80.000 |
+| Salón de clase permanente | Webcam o cámara IP wifi | COP 170.000 a 500.000 |
+| Portería, un punto, con placas | Cámara LPR, cámara de contexto, switch PoE, cableado y UPS | COP 1.700.000 a 3.400.000 |
+| Tiempo real en vez de por lotes | GPU usada RTX 3060 12 GB | COP 840.000 a 1.180.000 |
+| Sin computador prendido | Raspberry Pi 5 con kit Hailo | COP 800.000 |
+
+### 11.7 Por qué no comprar nada todavía
+
+El lente se escoge con la distancia medida, y esa distancia no se sabe hasta
+pararse en el sitio donde iría la cámara. Comprar antes de la Fase 0 es
+escoger el lente a ojo, que es exactamente el error de 11.1. La secuencia
+correcta es: grabar con el celular, medir el ancho de placa que queda, y **de
+esa medición sale el lente que hay que pedir**, no al revés.
+
+---
+
+## 12. El accionable, uno solo
+
+**Comprar un trípode con soporte de celular, entre COP 40.000 y 80.000, y
+grabar 60 segundos parado donde iría la cámara en la escena de calle.** Es la
+única compra que tiene sentido hoy. De ese video salen las dos cifras que
+deciden todo lo demás: el ancho de placa en píxeles, que dice si la Fase 2
+existe, y la distancia real al punto de paso, que dice qué lente pedir. La Fase
+1 no depende de esto y puede arrancar en paralelo.
