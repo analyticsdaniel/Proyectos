@@ -72,7 +72,16 @@ class Resumen:
     conteo_por_clase: dict[str, int] = field(default_factory=dict)
     unicos_por_clase: dict[str, int] = field(default_factory=dict)
     placas: list[EventoPlaca] = field(default_factory=list)
+
     detecciones: list[Deteccion] = field(default_factory=list)
+    """Solo para videos cortos y pruebas. NO acumular aqui en produccion.
+
+    Una jornada de 12 horas son del orden de 1,3 millones de detecciones, que
+    en memoria son entre 400 MB y 1 GB de objetos vivos sin ninguna razon. El
+    camino normal escribe cada deteccion al CSV apenas ocurre y deja en memoria
+    solo los contadores y la votacion de placas, que son unos pocos kilobytes.
+    Ver la seccion 13.5 de PLAN.md.
+    """
 
     def como_dict(self) -> dict:
         return {

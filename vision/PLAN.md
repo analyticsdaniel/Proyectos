@@ -539,7 +539,115 @@ aprendizaje, sin más inversión de tiempo.
 
 ---
 
-## 13. El accionable, uno solo
+## 13. Cómo llega el video al computador y cuánta memoria pide
+
+### 13.1 Las tres rutas de entrada
+
+**Ruta A. Celular, que es la de las fases 0 y 1.** Se graba en el celular y el
+archivo se pasa al computador **por cable USB**, arrastrándolo desde la carpeta
+DCIM. Nada más.
+
+**Con una advertencia que vale todo el proyecto: no mandar el video por
+WhatsApp.** WhatsApp recomprime a resolución y tasa de bits mucho más bajas, y
+lo primero que se pierde en esa recompresión es justamente el detalle fino de
+la placa, que son los píxeles por los que se compró el trípode. Lo mismo aplica
+a Telegram como foto o a cualquier cosa que diga comprimir. Si tiene que ir por
+nube, Google Drive subiendo el archivo como archivo, nunca como foto, y en
+calidad original.
+
+Segunda razón para el cable: una jornada de 12 horas son unos 30 GB. Por USB 3
+eso se copia en unos 4 minutos. Por una subida doméstica de 20 Mbps se demora
+más de 3 horas.
+
+**Ruta B. Cámara IP, que es la del Nivel 2.** Aquí no hay que pasar ningún
+archivo, y esa es la ventaja. Una cámara IP publica lo que ve como un flujo
+RTSP en la red local, con una dirección del estilo
+`rtsp://usuario:clave@192.168.1.50:554/stream1`. **El código no cambia:**
+OpenCV abre esa dirección igual que abre un archivo, cambiando una sola línea.
+
+    cv2.VideoCapture("video.mp4")      # archivo
+    cv2.VideoCapture("rtsp://...")     # cámara en vivo
+
+El cable físico es uno solo, UTP, y con PoE lleva datos y corriente al tiempo
+hasta unos 100 metros, así que la cámara no necesita toma de luz propia.
+
+**Ruta C, que es la que sobra.** Tarjeta microSD dentro de la cámara, sacarla a
+mano y copiarla. Funciona, pero obliga a que alguien vaya y vuelva, que es
+exactamente lo que no queremos. Sirve solo como respaldo si se cae la red.
+
+### 13.2 Cuánto pesa el video
+
+| Fuente | Tasa | Por hora | Por jornada de 12 h |
+|---|---|---|---|
+| Celular 1080p a 30 fps | 17 Mbps | 7,5 GB | 90 GB |
+| Celular 1080p a 60 fps | 30 Mbps | 13,5 GB | 162 GB |
+| Celular 4K a 30 fps | 50 Mbps | 22,5 GB | 270 GB |
+| Cámara IP 4MP en H.265 | 5 Mbps | 2,3 GB | 27 GB |
+| Cámara IP 4MP en H.264 | 10 Mbps | 4,5 GB | 54 GB |
+
+Dos lecturas. La primera: **el celular pesa tres a seis veces más que la cámara
+IP** para menos calidad útil, porque graba con códec y tasa pensados para ver,
+no para archivar. La segunda: los 60 segundos de la Fase 0 pesan 225 MB, o sea
+nada, y no hay que preocuparse por disco hasta que haya jornadas completas.
+
+Para grabación continua de una cámara IP en H.265: 55 GB al día, 1,6 TB al mes.
+Un disco de 4 TB, entre COP 340.000 y 420.000, aguanta dos meses de una cámara
+o dos semanas de cuatro.
+
+### 13.3 La decisión que ahorra el disco entero
+
+**Si lo que importa es el conteo, el video no se guarda.** Se procesa por
+bloques y se descarta, y queda solo la tabla.
+
+| Qué se guarda | Por hora |
+|---|---|
+| El video | 2.300 MB |
+| El CSV de detecciones | 8,6 MB |
+| Solo recortes de placa en JPEG | 10 MB por cada 1.000 vehículos |
+
+La tabla pesa **más de 250 veces menos que el video**. Un año entero de conteo
+cabe en lo que ocupa un día de grabación. Lo razonable es guardar la tabla
+siempre, los recortes de los casos dudosos, y el video solo de los minutos
+alrededor de algo que haya que mirar con ojos.
+
+### 13.4 Cuánta RAM pide el programa
+
+Aquí memoria significa otra cosa, y la respuesta es tranquilizadora: **el
+pipeline nunca carga el video entero.** Lee frame por frame y suelta el
+anterior. Un frame de 1080p ocupa 6,2 MB en memoria, y es lo único del video
+que está adentro en un instante dado.
+
+| Configuración | RAM del proceso |
+|---|---|
+| YOLO nano en CPU, 1080p | 1,5 a 2 GB |
+| YOLO medium en CPU | 3 a 4 GB |
+| En GPU, YOLO nano a 640 px | menos de 2 GB de VRAM |
+
+Con 8 GB de RAM va bien y con 16 GB sobra. Cualquier computador de trabajo de
+los últimos años sirve. La GPU importa para la velocidad, no para que quepa.
+
+### 13.5 El defecto que esta pregunta destapó
+
+Hay un problema real en el código ya escrito, y conviene dejarlo anotado en vez
+de descubrirlo con el disco lleno. En `modelos.py`, la clase `Resumen` tiene un
+campo `detecciones` que es una lista, y el pipeline tal como está pensado la
+iría llenando hasta el final del video.
+
+Una jornada de 12 horas analizando uno de cada tres frames son 432.000 frames,
+y con tres objetos promedio por frame, **1,3 millones de detecciones acumuladas
+en memoria**, que son del orden de 400 MB a 1 GB de objetos de Python vivos sin
+ninguna razón.
+
+**Corrección para la Fase 1:** el campo `detecciones` se usa solo para videos
+cortos y pruebas, y el camino normal escribe cada detección al CSV apenas
+ocurre y mantiene en memoria únicamente los contadores y la votación de placas,
+que son unos pocos kilobytes. Con eso el consumo se vuelve constante y da igual
+si el video dura un minuto o doce horas. Esto ya estaba insinuado en el punto 3
+de la sección 5, pero no estaba escrito como requisito, y ahora lo está.
+
+---
+
+## 14. El accionable, uno solo
 
 **Llamar a dos firmas de estudios de tránsito o movilidad y preguntar qué
 pagan hoy por un día de aforo vehicular en un punto.** Dos llamadas, quince
