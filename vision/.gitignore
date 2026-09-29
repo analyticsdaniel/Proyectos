@@ -1,0 +1,15 @@
+# Pesos de los modelos: se descargan solos la primera vez, pesan megas y no son código.
+pesos/
+
+# Salidas del análisis: CSV, JSON y video anotado de cada corrida.
+salidas/
+
+# Entorno virtual, si alguna vez queda dentro del proyecto.
+# El de este PC vive en C:\Users\Daniel Sanchez\.venvs\vision, por el límite de
+# rutas largas de Windows. Ver el README.
+.venv/
+
+# Basura de Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
