@@ -15,6 +15,9 @@ class Config:
     modelo: str = "yolov8n.pt"
     """Pesos YOLO. yolov8n es el mas rapido; yolov8s/m/l aciertan mas y van mas lento."""
 
+    carpeta_pesos: str = "pesos"
+    """Donde quedan los pesos descargados, para no regarlos por el disco."""
+
     confianza_min: float = 0.35
     iou: float = 0.5
     imgsz: int = 640
@@ -70,3 +73,18 @@ class Config:
 
     def color_de(self, clase: str) -> tuple[int, int, int]:
         return self.colores.get(clase, (200, 200, 200))
+
+    def ruta_modelo(self) -> str:
+        """Ruta de los pesos. Un nombre suelto se busca en `carpeta_pesos`.
+
+        Asi `yolov8n.pt` se descarga una vez a `pesos/` y no al directorio desde
+        donde se corra el comando. Una ruta explicita se respeta tal cual.
+        """
+        from pathlib import Path
+
+        candidato = Path(self.modelo)
+        if candidato.parent != Path("."):
+            return str(candidato)
+        carpeta = Path(self.carpeta_pesos)
+        carpeta.mkdir(parents=True, exist_ok=True)
+        return str(carpeta / candidato.name)

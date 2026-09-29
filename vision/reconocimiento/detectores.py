@@ -31,7 +31,7 @@ class DetectorYOLO:
         from ultralytics import YOLO  # import perezoso
 
         self.config = config
-        self.modelo = YOLO(config.modelo)
+        self.modelo = YOLO(config.ruta_modelo())
         self.nombres: dict[int, str] = dict(self.modelo.names)
         self._indices_interes = [
             idx

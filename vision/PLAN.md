@@ -751,7 +751,84 @@ de la sección 5, pero no estaba escrito como requisito, y ahora lo está.
 
 ---
 
-## 14. El accionable, uno solo
+## 14. La Fase 1, construida y medida el 29 de septiembre de 2026
+
+Se construyó en el computador de Daniel, con entorno propio y GPU. Lo que
+sigue son mediciones hechas acá, no estimaciones.
+
+### 14.1 Qué quedó hecho
+
+1. `pipeline.py`. Recorre el video, detecta, sigue, cuenta únicos, escribe el
+   CSV **detección por detección** y guarda el punto de reanudación cada 100
+   frames analizados. Valida el video al abrir y falla con el motivo dicho, no
+   a los 40 minutos.
+2. `salidas.py`. CSV incremental, JSON de resumen y video anotado. Si el códec
+   del video anotado no está, avisa y sigue: perder la anotación no justifica
+   perder el análisis.
+3. `cli.py`. `python -m reconocimiento video.mp4`, con `--salto`,
+   `--dispositivo`, `--clases`, `--sin-video`, `--reanudar` y `--max-frames`.
+4. `pruebas/`. 34 pruebas en 0,44 segundos, sin descargar nada ni tocar la GPU.
+   Las del pipeline usan un video sintético y un detector falso.
+5. `README.md` con el manual de uso.
+
+**El defecto de la sección 13.5 quedó corregido:** el camino normal no acumula
+detecciones en memoria. Solo quedan vivos los contadores y un conjunto de
+cadenas `clase:id`. `Resumen.detecciones` solo se llena si se pide
+explícitamente, y solo se usa en pruebas.
+
+### 14.2 El entorno, verificado
+
+torch 2.14 con CUDA 13.0 sobre una **RTX 4070 Laptop de 8 GB**, ultralytics
+8.4.150, OpenCV 5.0, Python 3.14. YOLO descarga los pesos a `pesos/` y detecta
+correctamente.
+
+**Un riesgo de la sección 5 quedó descartado:** OpenCV sí lee y escribe con
+rutas que llevan tilde, como `Tecnología`. Probado leyendo, escribiendo video y
+escribiendo JPEG.
+
+### 14.3 Velocidad medida, que corrige la sección 5.7
+
+El plan decía "5 a 15 frames por segundo en CPU". Lo medido sobre 1080p con
+`yolov8n`, analizando todos los frames:
+
+| Configuración | Frames por segundo | Una hora de video |
+|---|---|---|
+| GPU, sin video anotado | 39,7 | 45 minutos |
+| CPU, sin video anotado | 19,0 | 1 hora 35 minutos |
+| GPU, con video anotado | 16,8 | 1 hora 47 minutos |
+
+Dos lecturas que no estaban en el plan:
+
+1. **La CPU de este computador va mejor de lo supuesto**, 19 en vez de 5 a 15.
+2. **Dibujar el video anotado cuesta más que detectar.** En GPU, escribirlo baja
+   el rendimiento de 39,7 a 16,8, o sea que se pierde el 58 por ciento del
+   tiempo dibujando algo que casi nunca se mira. Por eso `--sin-video` es la
+   opción más rentable de todas, y por eso conviene que la Fase 4 corra sin
+   video anotado y lo genere solo cuando alguien pida revisar un tramo.
+
+### 14.4 Un defecto que destaparon las pruebas
+
+`normalizar_placa` corregía sin límite, y eso **inventaba placas**. Como toda
+letra tiene un dígito parecido y al revés, cualquier cadena de seis caracteres
+terminaba convertida en una placa "válida": `12345678901234` salía como
+`ASG789`. Peor todavía, `ABC12D`, que es una placa de moto perfectamente leída,
+salía como `ABC120`, porque el formato de carro se probaba primero.
+
+Corregido: ahora gana el formato que **menos correcciones** necesita y se
+descarta lo que exija más de dos. Una placa faltante es mejor que una inventada,
+y esto importa el día que se encienda el OCR.
+
+### 14.5 Lo que la Fase 1 todavía no resuelve
+
+El conteo de únicos se basa en el identificador del rastreador. Si el
+rastreador pierde un objeto y le cambia el id, ese objeto cuenta dos veces, y el
+JSON de resumen lo dice con esas palabras en el campo `advertencia_conteo`. El
+criterio de aceptación del plan, no desviarse más del 20 por ciento del conteo
+manual, **no se ha comprobado todavía, porque no hay video real grabado.**
+
+---
+
+## 15. El accionable, uno solo
 
 **Llamar a dos firmas de estudios de tránsito o movilidad y preguntar qué
 pagan hoy por un día de aforo vehicular en un punto.** Dos llamadas, quince

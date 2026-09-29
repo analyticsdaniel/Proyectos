@@ -38,11 +38,27 @@ def limpiar(texto: str) -> str:
     return _NO_ALFANUM.sub("", texto.upper())
 
 
-def _forzar_formato(candidato: str, plantilla: str) -> str | None:
-    """Empuja cada caracter al tipo que la plantilla exige en esa posicion."""
+MAX_CORRECCIONES = 2
+"""Cuantos caracteres se le pueden corregir a una lectura antes de descartarla.
+
+Sin este limite la normalizacion se vuelve peligrosa: como toda letra tiene un
+digito parecido y al reves, cualquier cadena de seis caracteres termina
+convertida en una placa "valida". Con el limite, una lectura que hay que
+retorcer entera se descarta, que es lo correcto. Una placa inventada es peor
+que una placa faltante.
+"""
+
+
+def _forzar_formato(candidato: str, plantilla: str) -> tuple[str, int] | None:
+    """Empuja cada caracter al tipo que la plantilla exige en esa posicion.
+
+    Devuelve el texto corregido y cuantos caracteres hubo que cambiar, para que
+    quien llame pueda preferir el formato que menos retuerce la lectura.
+    """
     if len(candidato) != len(plantilla):
         return None
     salida = []
+    cambios = 0
     for caracter, tipo in zip(candidato, plantilla):
         if tipo == "L":
             corregido = caracter.translate(A_LETRA)
@@ -54,19 +70,33 @@ def _forzar_formato(candidato: str, plantilla: str) -> str | None:
                 return None
         else:
             corregido = caracter
+        if corregido != caracter:
+            cambios += 1
         salida.append(corregido)
-    return "".join(salida)
+    return "".join(salida), cambios
 
 
-def normalizar_placa(texto: str, formatos: tuple[str, ...] = ("carro_co", "moto_co")) -> str | None:
+def normalizar_placa(
+    texto: str,
+    formatos: tuple[str, ...] = ("carro_co", "moto_co"),
+    max_correcciones: int = MAX_CORRECCIONES,
+) -> str | None:
     """Convierte una lectura cruda de OCR en una placa valida, o None.
 
-    Tolera basura alrededor: si el OCR devuelve 'CO ABC123 X' encuentra
-    la ventana que si encaja en alguno de los formatos pedidos.
+    Tolera basura alrededor: si el OCR devuelve 'CO ABC123 X' encuentra la
+    ventana que si encaja en alguno de los formatos pedidos.
+
+    Entre varias lecturas posibles gana **la que menos correcciones necesita**,
+    no la del primer formato de la lista. Sin eso, 'ABC12D', que es una placa de
+    moto perfectamente leida, salia convertida en 'ABC120' porque el formato de
+    carro se probaba primero y la D se dejaba forzar a cero.
     """
     limpio = limpiar(texto)
     if not limpio:
         return None
+
+    mejor: str | None = None
+    mejor_cambios = max_correcciones + 1
 
     plantillas = [FORMATOS[f] for f in formatos if f in FORMATOS]
     for plantilla in plantillas:
@@ -74,10 +104,15 @@ def normalizar_placa(texto: str, formatos: tuple[str, ...] = ("carro_co", "moto_
         if len(limpio) < largo:
             continue
         for inicio in range(len(limpio) - largo + 1):
-            forzado = _forzar_formato(limpio[inicio:inicio + largo], plantilla)
-            if forzado is not None:
-                return forzado
-    return None
+            resultado = _forzar_formato(limpio[inicio:inicio + largo], plantilla)
+            if resultado is None:
+                continue
+            forzado, cambios = resultado
+            if cambios < mejor_cambios:
+                mejor, mejor_cambios = forzado, cambios
+                if cambios == 0:
+                    return mejor
+    return mejor
 
 
 def distancia(a: str, b: str) -> int:
